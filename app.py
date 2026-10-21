@@ -1,6 +1,4 @@
 import os
-import re
-from urllib.parse import urlparse
 
 import matplotlib
 matplotlib.use("Agg")
@@ -10,9 +8,6 @@ import streamlit as st
 
 from src.predict import best_model_name, load_model, predict_urls
 
-# ==============================================================================
-# PLAYFUL GEOMETRIC DESIGN SYSTEM - STREAMLIT CONFIGURATION
-# ==============================================================================
 st.set_page_config(
     page_title="PhishPop! | Playful Phishing URL Detector",
     page_icon="⚡",
@@ -20,15 +15,12 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Fail-safe check for model artifacts
+# stop early if the models haven't been trained yet
 if not os.path.exists("models/best_model.txt"):
     st.error("🚨 No trained model found. Please run `python -m src.train` first.")
     st.stop()
 
 
-# ==============================================================================
-# CACHED DATA & MODEL LOADERS
-# ==============================================================================
 @st.cache_resource
 def get_model(name):
     return load_model(name)
@@ -67,14 +59,10 @@ FEATURE_META = {
     "keyword_count": {"name": "Target Keywords", "category": "Lexical", "color": "#F472B6"},
 }
 
-# ==============================================================================
-# CSS: PLAYFUL GEOMETRIC DESIGN TOKEN INJECTION (PLAIN BACKGROUND)
-# ==============================================================================
+# custom styling
 st.markdown("""
 <style>
-    /* ------------------------------------------------------------- */
-    /* 1. TYPOGRAPHY: Outfit (Headings) & Plus Jakarta Sans (Body)  */
-    /* ------------------------------------------------------------- */
+    /* fonts */
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
 
     html, body, [class*="css"] {
@@ -89,18 +77,14 @@ st.markdown("""
         letter-spacing: -0.02em;
     }
 
-    /* ------------------------------------------------------------- */
-    /* 2. BACKGROUND: Clean Plain Warm Cream Paper (#FFFDF5)        */
-    /* ------------------------------------------------------------- */
+    /* page background */
     .stApp {
         background-color: #FFFDF5 !important;
         background-image: none !important;
         color: #1E293B;
     }
 
-    /* ------------------------------------------------------------- */
-    /* 3. SIDEBAR: Clean Plain Paper with 2px solid border          */
-    /* ------------------------------------------------------------- */
+    /* sidebar */
     section[data-testid="stSidebar"] {
         background-color: #FFFDF5 !important;
         background-image: none !important;
@@ -110,9 +94,7 @@ st.markdown("""
         gap: 0.9rem;
     }
 
-    /* ------------------------------------------------------------- */
-    /* 4. PLAYFUL STICKER CARDS (Solid White + 2px Border + Hard Pop)*/
-    /* ------------------------------------------------------------- */
+    /* cards */
     .sticker-card {
         background: #FFFFFF;
         border: 2px solid #1E293B;
@@ -128,7 +110,7 @@ st.markdown("""
         box-shadow: 8px 8px 0px 0px #1E293B;
     }
 
-    /* Hero Banner: Playful Memphis Header */
+    /* hero banner */
     .hero-banner {
         background: #FFFFFF;
         border: 2.5px solid #1E293B;
@@ -155,7 +137,7 @@ st.markdown("""
         line-height: 1.5;
     }
 
-    /* Decorative Geometric Badges */
+    /* badges */
     .pop-badge {
         display: inline-flex;
         align-items: center;
@@ -175,7 +157,7 @@ st.markdown("""
     .badge-mint   { background: #34D399; color: #1E293B; }
     .badge-white  { background: #FFFFFF; color: #1E293B; }
 
-    /* Rotated Sticker Tape / Tag */
+    /* tilted tag */
     .tape-tag {
         display: inline-block;
         padding: 4px 14px;
@@ -191,9 +173,7 @@ st.markdown("""
         border-radius: 6px;
     }
 
-    /* ------------------------------------------------------------- */
-    /* 5. TACTILE VERDICT CARDS                                      */
-    /* ------------------------------------------------------------- */
+    /* verdict cards */
     .verdict-phish {
         background: #FFF1F2;
         border: 2.5px solid #1E293B;
@@ -213,7 +193,7 @@ st.markdown("""
         position: relative;
     }
 
-    /* Tactical Mini Tiles (Grid of 4) */
+    /* small stat tiles */
     .pop-tile {
         background: #FFFFFF;
         border: 2px solid #1E293B;
@@ -242,7 +222,7 @@ st.markdown("""
         color: #64748B;
     }
 
-    /* URL pill showcase */
+    /* url box */
     .pop-url-pill {
         font-family: 'JetBrains Mono', monospace;
         background: #F8FAFC;
@@ -256,7 +236,7 @@ st.markdown("""
         box-shadow: 3px 3px 0px 0px #E2E8F0;
     }
 
-    /* Chunky Candy Progress Meter */
+    /* probability bar */
     .candy-meter-bg {
         width: 100%;
         height: 18px;
@@ -292,10 +272,7 @@ st.markdown("""
         border-right: 2px solid #1E293B;
     }
 
-    /* ------------------------------------------------------------- */
-    /* 6. STREAMLIT WIDGETS OVERRIDES (CANDY BUTTONS & TABS)         */
-    /* ------------------------------------------------------------- */
-    /* Tabs Navigation */
+    /* tabs */
     button[data-baseweb="tab"] {
         font-family: 'Outfit', sans-serif !important;
         font-size: 1.1rem !important;
@@ -316,7 +293,7 @@ st.markdown("""
         transform: translateY(2px) !important;
     }
 
-    /* Primary & Secondary Candy Buttons */
+    /* buttons */
     div.stButton > button {
         background-color: #FFFFFF !important;
         color: #1E293B !important;
@@ -324,7 +301,7 @@ st.markdown("""
         font-weight: 800 !important;
         font-size: 0.95rem !important;
         border: 2.5px solid #1E293B !important;
-        border-radius: 9999px !important; /* Pill shape */
+        border-radius: 9999px !important;
         padding: 10px 24px !important;
         box-shadow: 4px 4px 0px 0px #1E293B !important;
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -352,7 +329,7 @@ st.markdown("""
         box-shadow: 2px 2px 0px 0px #1E293B !important;
     }
 
-    /* Primary button specific styling */
+    /* primary button */
     div.stButton > button[kind="primary"] {
         background-color: #8B5CF6 !important;
         color: #FFFFFF !important;
@@ -371,7 +348,7 @@ st.markdown("""
         box-shadow: 6px 6px 0px 0px #1E293B !important;
     }
 
-    /* Text Input - High Contrast & Crisp Visibility */
+    /* text input */
     div[data-testid="stTextInputRootElement"],
     div[data-testid="stTextInput"] > div,
     div[data-testid="stTextInput"] > div > div,
@@ -399,7 +376,7 @@ st.markdown("""
         font-size: 1.02rem !important;
     }
 
-    /* Selectbox */
+    /* selectbox */
     div[data-baseweb="select"] > div {
         border: 2.5px solid #1E293B !important;
         border-radius: 12px !important;
@@ -407,7 +384,7 @@ st.markdown("""
         box-shadow: 3px 3px 0px 0px #1E293B !important;
     }
 
-    /* Dataframe wrapper with hard shadow */
+    /* tables */
     div[data-testid="stDataFrame"] {
         border: 2px solid #1E293B !important;
         border-radius: 16px !important;
@@ -416,7 +393,7 @@ st.markdown("""
         background: #FFFFFF !important;
     }
 
-    /* File uploader styling */
+    /* file uploader */
     div[data-testid="stFileUploader"] {
         background: #FFFFFF !important;
         border: 2px dashed #1E293B !important;
@@ -428,11 +405,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ==============================================================================
-# SIDEBAR: PLAYFUL STICKER CONTROLS
-# ==============================================================================
+# sidebar
 with st.sidebar:
-    # Playful Logo & Header
     st.markdown("""
         <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
             <div style="background: #FBBF24; border: 2px solid #1E293B; padding: 12px 14px; border-radius: 18px; box-shadow: 4px 4px 0px 0px #1E293B;">
@@ -447,7 +421,6 @@ with st.sidebar:
 
     st.markdown("<hr style='border: none; border-top: 2px solid #1E293B; margin: 16px 0;'>", unsafe_allow_html=True)
 
-    # Engine selector
     st.markdown("#### 🎮 AI Engine Selection")
     model_name = st.selectbox(
         "Active Algorithm",
@@ -472,7 +445,6 @@ with st.sidebar:
 
     st.markdown("<hr style='border: none; border-top: 2px solid #1E293B; margin: 16px 0;'>", unsafe_allow_html=True)
 
-    # Threat Severity Scale
     with st.expander("🎈 Threat Scale Guide", expanded=False):
         st.markdown("""
         - 🟢 **0% - 35%**: **Safe & Benign**
@@ -483,7 +455,6 @@ with st.sidebar:
           Deceptive brand keywords, suspicious TLDs, or credential traps.
         """)
 
-    # Footer Sticker
     st.markdown("""
         <div style="margin-top: 28px; text-align: center;">
             <div class="tape-tag">✨ PLAYFUL GEOMETRIC v2.0</div>
@@ -491,13 +462,10 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-# Load selected model
 model = get_model(model_name)
 
 
-# ==============================================================================
-# HERO BANNER: STABLE GRID, WILD DECORATION
-# ==============================================================================
+# header banner
 st.markdown(f"""
     <div class="hero-banner">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
@@ -522,9 +490,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-# ==============================================================================
-# TOP-LEVEL TABS (PLAYFUL GEOMETRIC NAVIGATION)
-# ==============================================================================
 tab_single, tab_batch, tab_models = st.tabs([
     "🔍 Single URL Scanner",
     "📂 Batch URL Inspector",
@@ -532,14 +497,11 @@ tab_single, tab_batch, tab_models = st.tabs([
 ])
 
 
-# ==============================================================================
-# TAB 1: SINGLE URL SCANNER
-# ==============================================================================
+# single url tab
 with tab_single:
     st.markdown("<h3 class='pop-heading'>🔍 Single URL Inspection</h3>", unsafe_allow_html=True)
     st.markdown("Enter any target web address below or click our quick test sticker samples to inspect the lexical and structural signals:")
 
-    # Quick test sample presets
     st.markdown("<p style='font-size: 0.82rem; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;'>QUICK TEST SAMPLES:</p>", unsafe_allow_html=True)
     sample_cols = st.columns(5)
     sample_urls = [
@@ -555,10 +517,9 @@ with tab_single:
 
     for idx, (label, sample_url) in enumerate(sample_urls):
         with sample_cols[idx]:
-            if st.button(label, key=f"candy_sample_{idx}", use_container_width=True):
+            if st.button(label, key=f"sample_{idx}", use_container_width=True):
                 st.session_state.current_url = sample_url
 
-    # Input row
     input_col, btn_col = st.columns([5, 1])
     with input_col:
         url_input = st.text_input(
@@ -583,9 +544,7 @@ with tab_single:
         verdict_title = "MALICIOUS PHISHING DETECTED!" if is_phishing else "VERIFIED LEGITIMATE & SAFE!"
         badge_style = "badge-pink" if is_phishing else "badge-mint"
 
-        # ----------------------------------------------------------------------
-        # POP VERDICT CARD
-        # ----------------------------------------------------------------------
+        # verdict card
         st.markdown(f"""
             <div class="{verdict_class}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
@@ -619,9 +578,7 @@ with tab_single:
             </div>
         """, unsafe_allow_html=True)
 
-        # ----------------------------------------------------------------------
-        # 4 TACTILE KPI TILES
-        # ----------------------------------------------------------------------
+        # four signal tiles
         st.markdown("<h4 class='pop-heading'>🧩 Structural & Security Signals</h4>", unsafe_allow_html=True)
         ind_col1, ind_col2, ind_col3, ind_col4 = st.columns(4)
 
@@ -674,9 +631,7 @@ with tab_single:
                 </div>
             """, unsafe_allow_html=True)
 
-        # ----------------------------------------------------------------------
-        # FEATURE IMPORTANCE & EXPLAINABILITY
-        # ----------------------------------------------------------------------
+        # feature importance chart and table
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
         chart_col, table_col = st.columns([1, 1])
 
@@ -699,7 +654,6 @@ with tab_single:
             st.markdown("<h4 class='pop-heading'>📊 Feature Influence Breakdown</h4>", unsafe_allow_html=True)
             st.caption(f"Top 10 most influential features contributing to the {model_name} prediction.")
 
-            # Playful Geometric Matplotlib Theme
             fig, ax = plt.subplots(figsize=(6, 4.2), facecolor="#FFFDF5")
             ax.set_facecolor("#FFFFFF")
 
@@ -707,7 +661,6 @@ with tab_single:
             weights = top_features["importance"].iloc[::-1]
             names = top_features["friendly_name"].iloc[::-1]
 
-            # Playful rotational palette
             palette = ["#8B5CF6", "#F472B6", "#FBBF24", "#34D399"]
             bar_colors = [palette[i % len(palette)] for i in range(len(top_features))]
 
@@ -751,9 +704,7 @@ with tab_single:
             )
 
 
-# ==============================================================================
-# TAB 2: BATCH URL INSPECTOR
-# ==============================================================================
+# batch tab
 with tab_batch:
     st.markdown("<h3 class='pop-heading'>📂 Batch URL Inspector</h3>", unsafe_allow_html=True)
     st.markdown("Scan bulk domain logs, proxy files, or security alerts simultaneously to isolate threats with speed:")
@@ -771,7 +722,7 @@ with tab_batch:
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
         st.markdown("<h5 class='pop-heading' style='margin-bottom: 4px;'>Or Load Built-in Test Set</h5>", unsafe_allow_html=True)
         st.caption("Instantly test the batch pipeline with our pre-configured attack vectors.")
-        use_sample = st.button("📁 LOAD `test_urls.csv`", key="btn_load_sample_csv_playful", use_container_width=True)
+        use_sample = st.button("📁 LOAD `test_urls.csv`", key="load_sample_csv", use_container_width=True)
 
     data = None
     if file is not None:
@@ -792,7 +743,7 @@ with tab_batch:
         legitimate_count = total_scanned - phishing_count
         threat_rate = (phishing_count / total_scanned) if total_scanned > 0 else 0
 
-        # KPI Summary Grid
+        # summary tiles
         st.markdown("<hr style='border: none; border-top: 2px solid #1E293B; margin: 20px 0;'>", unsafe_allow_html=True)
         st.markdown("<h4 class='pop-heading'>📊 Batch Scan Executive Summary</h4>", unsafe_allow_html=True)
         kpi1, kpi2, kpi3, kpi4 = st.columns(4)
@@ -831,7 +782,7 @@ with tab_batch:
 
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
-        # Filters and download
+        # filter and download
         table_controls, download_col = st.columns([3, 1])
         with table_controls:
             filter_choice = st.radio(
@@ -851,7 +802,6 @@ with tab_batch:
                 use_container_width=True
             )
 
-        # Compute percentage for progress bar
         display_batch_df = result.copy()
         display_batch_df["Risk Score (%)"] = (display_batch_df["Phishing probability"] * 100).round(1)
 
@@ -878,9 +828,7 @@ with tab_batch:
         )
 
 
-# ==============================================================================
-# TAB 3: MODEL PERFORMANCE & BENCHMARKS
-# ==============================================================================
+# model comparison tab
 with tab_models:
     st.markdown("<h3 class='pop-heading'>📊 Model Performance & Comparative Benchmarks</h3>", unsafe_allow_html=True)
     st.markdown("Examine the statistical validation metrics across all 4 machine learning architectures evaluated on the test partition.")
@@ -925,7 +873,6 @@ with tab_models:
 
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
-        # Tabular Leaderboard
         st.markdown("<h4 class='pop-heading'>🏆 Benchmark Leaderboard</h4>", unsafe_allow_html=True)
         formatted_df = results_df.copy()
         for col in ["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]:
@@ -938,7 +885,6 @@ with tab_models:
             use_container_width=True,
         )
 
-    # Visual Evidence & Artifacts
     st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
     st.markdown("<h4 class='pop-heading'>📈 Visual Performance Evidence</h4>", unsafe_allow_html=True)
 
@@ -962,7 +908,6 @@ with tab_models:
         else:
             st.info("Chart artifact `top_features.png` not found in `models/`.")
 
-    # Technical Overview Expander
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     with st.expander("🎈 Technical Architecture & Methodology", expanded=False):
         st.markdown("""
