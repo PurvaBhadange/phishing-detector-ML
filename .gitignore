@@ -1,0 +1,18 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Raw training dataset (not needed for deployment, models are pre-trained)
+data/PhiUSIIL_Phishing_URL_Dataset.csv
+
+# OS files
+Thumbs.db
+.DS_Store
