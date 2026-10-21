@@ -5,3 +5,6 @@ backgroundColor = "#FFFDF5"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#1E293B"
 font = "sans serif"
+
+[server]
+runOnSave = true
